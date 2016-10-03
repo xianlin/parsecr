@@ -56,7 +56,7 @@ request({
 
         // Add to array only if conditions are met
         // Cannot be pants
-        if (!checkStr(productTitle,"pant") && blacklist(publisher)) { 
+        if (!checkStr(productTitle,"pant") && !blacklist(publisher)) { 
             // if carton sale (3 pc), cannot over $50
             if (checkStr(productTitle, "carton") && (productPrice <= 50)) {
                 obj.title = productTitle;
