@@ -1,8 +1,14 @@
+var CronJob = require('cron').CronJob;
 var parsecr = require('./parsecr.js');
 
-var minutes = 1, the_interval = minutes * 60 * 1000;
 
-setInterval(function() {
-  parsecr.run();
-}, the_interval);
+var job = new CronJob({
+  cronTime: '0 */10 7-23 * * *',
+  onTick:  function() {
+    parsecr.run();
+  },
+  start: true,
+  timeZone: "Asia/Singapore"
+});
 
+job.start();

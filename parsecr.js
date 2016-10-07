@@ -25,8 +25,20 @@ var blacklist = function(username) {
         //Not in the array
         return false;
     }
-}
+};
 
+var productHistoryArr = [];
+
+var inHistory = function(record) {
+
+    if (productHistoryArr.indexOf(record) > -1) {
+        //In the array!
+        return true;
+    } else {
+        //Not in the array
+        return false;
+    }
+};
 
 var parsecr = function(cb){
     request({
@@ -42,7 +54,7 @@ var parsecr = function(cb){
 
         $('.card.pdt-card').each(function(i, element) {
             var productURL = $(this).children('.pdt-card-img').children('.pdt-card-thumbnail').attr('href');
-            var productTitle = $(this).children('.pdt-card-caption').children('.pdt-card-title').text();
+            var productTitle = $(this).children('.pdt-card-caption').children('.pdt-cardo-title').text();
             productURL = "https://carousell.com" + productURL.replace(/\/\?rank.*$/g, '')
 
             var productImageUrl = $(this).children('.pdt-card-img').children('.pdt-card-thumbnail').children('img').attr('data-layzr');
@@ -57,7 +69,8 @@ var parsecr = function(cb){
 
             // Add to array only if conditions are met
             // Cannot be pants
-            if (!checkStr(productTitle,"pant") && !blacklist(publisher)) {
+            if (!checkStr(productTitle,"pant") && !!checkStr(productTitle,"pants") 
+		&&  blacklist(publisher) && !inHistory(productURL)) {
                 // if carton sale (3 pc), cannot over $50
                 if (checkStr(productTitle, "carton") && (productPrice <= 50)) {
                     obj.title = productTitle;
@@ -67,6 +80,7 @@ var parsecr = function(cb){
                     obj.user = publisher;
                     obj.time = publishedTime;
                     result.push(obj);
+                    productHistoryArr.push(productURL);
                 } else if (!checkStr(productTitle, "carton")) {
                     obj.title = productTitle;
                     obj.url = productURL;
@@ -75,16 +89,21 @@ var parsecr = function(cb){
                     obj.user = publisher;
                     obj.time = publishedTime;
                     result.push(obj);
+                    productHistoryArr.push(productURL);
                 }
             }
+
+            // delete last item if array reach 5 elements
+            if (productHistoryArr.length === 5) {
+		productHistoryArr.splice(4, 1);
+	    }
 
         });
 
         // console.log(result);
         cb(result);
     });
-}
-
+};
 
 var sendEmail = function(content) {
     if (content.length) {
@@ -96,7 +115,7 @@ var sendEmail = function(content) {
         var mailOptions = {
             to: process.env.EMAIL, // list of receivers
             subject: 'Found Your Products', // Subject line
-            text:  JSON.stringify(result)// html body
+            text:  JSON.stringify(content)// html body
         };
 
         // send mail with defined transport object
@@ -104,14 +123,16 @@ var sendEmail = function(content) {
             if(error){
                 return console.log(error);
             }
-            console.log('Message sent: ' + info.response);
+            var d = new Date();
+            console.log(d.toISOString() + ' Message sent: ' + info.response);
         });
     } else {
         console.log("no content to be sent via email");
     }
-}
+};
 
 
 exports.run = function() {
   parsecr(sendEmail);
 };
+
