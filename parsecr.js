@@ -54,7 +54,7 @@ var parsecr = function(cb){
 
         $('.card.pdt-card').each(function(i, element) {
             var productURL = $(this).children('.pdt-card-img').children('.pdt-card-thumbnail').attr('href');
-            var productTitle = $(this).children('.pdt-card-caption').children('.pdt-cardo-title').text();
+            var productTitle = $(this).children('.pdt-card-caption').children('.pdt-card-title').text();
             productURL = "https://carousell.com" + productURL.replace(/\/\?rank.*$/g, '')
 
             var productImageUrl = $(this).children('.pdt-card-img').children('.pdt-card-thumbnail').children('img').attr('data-layzr');
@@ -69,8 +69,8 @@ var parsecr = function(cb){
 
             // Add to array only if conditions are met
             // Cannot be pants
-            if (!checkStr(productTitle,"pant") && !!checkStr(productTitle,"pants") 
-		&&  blacklist(publisher) && !inHistory(productURL)) {
+            if (!checkStr(productTitle,"pant") && !checkStr(productTitle,"pants") 
+    &&  !blacklist(publisher) && !inHistory(productURL)) {
                 // if carton sale (3 pc), cannot over $50
                 if (checkStr(productTitle, "carton") && (productPrice <= 50)) {
                     obj.title = productTitle;
@@ -95,13 +95,13 @@ var parsecr = function(cb){
 
             // delete last item if array reach 5 elements
             if (productHistoryArr.length === 5) {
-		productHistoryArr.splice(4, 1);
-	    }
+                productHistoryArr.splice(4, 1);
+            }
 
         });
 
-        // console.log(result);
-        cb(result);
+        console.log(result);
+        // cb(result);
     });
 };
 
@@ -133,6 +133,6 @@ var sendEmail = function(content) {
 
 
 exports.run = function() {
-  parsecr(sendEmail);
+  parsecr(null);
 };
 
