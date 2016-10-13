@@ -68,7 +68,8 @@ var motorbike = function(cb){
             var obj = {};
 
             // Add to array only if conditions are met
-            if (checkStr(productTitle,"nc750x") && checkStr(productTitle,"honda")
+            if (checkStr(productTitle,"750") && checkStr(productTitle,"honda")
+                && checkStr(productTitle,"nc") && !checkStr(productTitle,"car") 
                 &&  !blacklist(publisher) && !inHistory(productURL)) {
                 obj.title = productTitle;
                 obj.url = productURL;
