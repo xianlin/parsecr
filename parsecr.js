@@ -100,8 +100,8 @@ var parsecr = function(cb){
 
         });
 
-        console.log(result);
-        // cb(result);
+        // console.log(result);
+        cb(result);
     });
 };
 
@@ -133,6 +133,6 @@ var sendEmail = function(content) {
 
 
 exports.run = function() {
-  parsecr(null);
+  parsecr(sendEmail);
 };
 

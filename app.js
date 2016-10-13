@@ -3,7 +3,7 @@ var parsecr = require('./parsecr.js');
 
 
 var job = new CronJob({
-  cronTime: '0 * 7-23 * * *',
+  cronTime: '0 */10 7-23 * * *',
   onTick:  function() {
     parsecr.run();
   },
