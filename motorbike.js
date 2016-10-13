@@ -17,7 +17,7 @@ var checkStr = function(str, word) {
 
 
 var blacklist = function(username) {
-    blacklistArr = ["radiant_city_services", "champ168"];
+    blacklistArr = [""];
     if (blacklistArr.indexOf(username) > -1) {
         //In the array!
         return true;
@@ -40,10 +40,10 @@ var inHistory = function(record) {
     }
 };
 
-var parsecr = function(cb){
+var motorbike = function(cb){
     request({
         method: 'GET',
-        url: 'https://carousell.com/search/products?query=huggies%20ultra%20diaper%20xl&price_start=5&price_end=60&condition=new&sort=recent'
+        url: 'https://carousell.com/search/products?query=honda%20750&collection_id=108&price_start=8000&price_end=30000&sort=recent'
     }, function(err, response, body) {
         if (err) return console.error(err);
 
@@ -68,29 +68,16 @@ var parsecr = function(cb){
             var obj = {};
 
             // Add to array only if conditions are met
-            // Cannot be pants
-            if (!checkStr(productTitle,"pant") && !checkStr(productTitle,"pants") 
-    &&  !blacklist(publisher) && !inHistory(productURL)) {
-                // if carton sale (3 pc), cannot over $50
-                if (checkStr(productTitle, "carton") && (productPrice <= 50)) {
-                    obj.title = productTitle;
-                    obj.url = productURL;
-                    obj.imageUrl = productImageUrl;
-                    obj.price = productPrice;
-                    obj.user = publisher;
-                    obj.time = publishedTime;
-                    result.push(obj);
-                    productHistoryArr.push(productURL);
-                } else if (!checkStr(productTitle, "carton")) {
-                    obj.title = productTitle;
-                    obj.url = productURL;
-                    obj.imageUrl = productImageUrl;
-                    obj.price = productPrice;
-                    obj.user = publisher;
-                    obj.time = publishedTime;
-                    result.push(obj);
-                    productHistoryArr.push(productURL);
-                }
+            if (checkStr(productTitle,"nc750x") && checkStr(productTitle,"honda")
+                &&  !blacklist(publisher) && !inHistory(productURL)) {
+                obj.title = productTitle;
+                obj.url = productURL;
+                obj.imageUrl = productImageUrl;
+                obj.price = productPrice;
+                obj.user = publisher;
+                obj.time = publishedTime;
+                result.push(obj);
+                productHistoryArr.push(productURL);
             }
 
             // delete last item if array reach 5 elements
@@ -100,13 +87,12 @@ var parsecr = function(cb){
 
         });
 
-        // console.log(result);
         cb(result);
     });
 };
 
 var sendEmail = function(content) {
-    if (content.length) {
+    if (content.length && process.env.NODE_ENV === 'production') {
         // create reusable transporter object using the default SMTP transport
         // var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
         var transporter = nodemailer.createTransport(process.env.SMTP_GMAIL);
@@ -114,7 +100,7 @@ var sendEmail = function(content) {
         // setup e-mail data with unicode symbols
         var mailOptions = {
             to: process.env.EMAIL, // list of receivers
-            subject: 'Found Your Products', // Subject line
+            subject: 'Found Your Motorbike', // Subject line
             text:  JSON.stringify(content)// html body
         };
 
@@ -126,13 +112,15 @@ var sendEmail = function(content) {
             var d = new Date();
             console.log(d.toISOString() + ' Message sent: ' + info.response);
         });
+    } else if (content.length === 0) {
+        console.log("No Motorbikes Found");
     } else {
-        console.log("no content to be sent via email");
+        console.log(content);
     }
 };
 
 
 exports.run = function() {
-  parsecr(sendEmail);
+  motorbike(sendEmail);
 };
 
