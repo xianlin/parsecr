@@ -1,20 +1,16 @@
-var cheerio = require('cheerio');
-var request = require('request');
-var nodemailer = require('nodemailer');
-
-require('dotenv').config();
+const cheerio = require('cheerio');
+const request = require('request');
 
 // IPhone stock ASCII Code in Integer, after convert from symbol
 const gotStockCode = 10003;
 const noStockCode = 8211;
 
-
-var iphone = function(cb){
+var find = function(webUrl, callback){
     request({
         method: 'GET',
-        url: process.env.M1_WEBSITE
+        url: webUrl
     }, function(err, response, body) {
-        if (err) return console.error(err);
+        if (err) return callback(err);
 
         // Tell Cherrio to load the HTML
         var $ = cheerio.load(body);
@@ -34,8 +30,8 @@ var iphone = function(cb){
         $('.stock td').each(function(i, element){
             var temp = $(element).text();
 
-            // The model is iphone 128GB JetBlack in this case and range from 295 to 307 row
-            // console.log("number " + i + " :" + temp);
+            // The model is iphone 128GB JetBlack in this case and range from 323 to 335 row
+            console.log("number " + i + " :" + temp);
             if (i >= 323 && i <= 335) {
                 stockArr.push(temp);
             }
@@ -43,48 +39,21 @@ var iphone = function(cb){
 
         // convert char to ACSII code and compare since the stock symbole are difficult to type
         // add the store name with the iphone stock to the result array
-        var result = [];
+        var storeGotstockArr = [];
         stockArr.forEach(function(element, index){
             if (element.charCodeAt(0) === gotStockCode) {
-                result.push(storeArr[index]);
+                storeGotstockArr.push(storeArr[index]);
             }
         });
 
-        cb(result);
+        var data = {};
+        var now = new Date();
+        data.time = now;
+        data.result = storeGotstockArr;
+        return callback(null, data);
     });
 };
 
-var sendEmail = function(content) {
-    if (content.length && process.env.NODE_ENV === 'production') {
-        // create reusable transporter object using the default SMTP transport
-        // var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
-        var transporter = nodemailer.createTransport(process.env.SMTP_GMAIL);
 
-        // setup e-mail data with unicode symbols
-        var mailOptions = {
-            to: process.env.EMAIL, // list of receivers
-            subject: 'Found Your Iphone', // Subject line
-            text:  JSON.stringify(content)// html body
-        };
-
-        // send mail with defined transport object
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error){
-                return console.log(error);
-            }
-            var d = new Date();
-            console.log(d.toISOString() + ' Message sent: ' + info.response);
-        });
-    } else if (content.length === 0) {
-        console.log("No Iphone Found");
-    } else {
-        console.log(JSON.stringify(content));
-    }
-};
-
-
-
-exports.run = function() {
-  iphone(sendEmail);
-};
+exports.find = find;
 
