@@ -1,25 +1,22 @@
 var CronJob = require('cron').CronJob;
-var diaper = require('./diaper.js');
-var motorbike = require('./motorbike.js');
+var iphone = require('./iphone.js');
 
 var job = {};
 
 if (process.env.NODE_ENV === "production") {
 	job = new CronJob({
-	  cronTime: '0 */15 7-23 * * *',
+	  cronTime: '00 05 9,15,18 * * *',
 	  onTick:  function() {
-	    diaper.run();
-	    motorbike.run();
+	    iphone.run();
 	  },
 	  start: true,
 	  timeZone: "Asia/Singapore"
 	});
 } else {
 	job = new CronJob({
-	  cronTime: '*/3 * 7-23 * * *',
+	  cronTime: '*/2 * * * * *',
 	  onTick:  function() {
-	    diaper.run();
-	    motorbike.run();
+	    iphone.run();
 	  },
 	  start: true,
 	  timeZone: "Asia/Singapore"
