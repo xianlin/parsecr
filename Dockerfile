@@ -11,4 +11,7 @@ RUN npm install
 # Bundle app source
 COPY . /usr/src/app
 
+ARG NODE=production
+ENV NODE_ENV ${NODE}
+
 CMD [ "npm", "start" ]

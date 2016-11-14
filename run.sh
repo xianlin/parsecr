@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 
-docker build -t node:parsecr .
+docker build -t test:m1_iphone_stock .
 
 sleep 5
 
-docker rm -f parsecr
+docker rm -f m1_iphone_stock
 
-docker run --name parsecr -d node:parsecr
+docker run --restart=always --name m1_iphone_stock -d test:m1_iphone_stock
