@@ -31,11 +31,12 @@ var find = function(webUrl, callback){
             var temp = $(element).text();
 
             // The model is iphone 128GB JetBlack in this case and range from 323 to 335 row
-            console.log("number " + i + " :" + temp);
+            // console.log("number " + i + " :" + temp);
             if (i >= 323 && i <= 335) {
                 stockArr.push(temp);
             }
         });
+	console.log("iPhone 128GB JetBlack: " + stockArr);
 
         // convert char to ACSII code and compare since the stock symbole are difficult to type
         // add the store name with the iphone stock to the result array
