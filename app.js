@@ -1,6 +1,7 @@
 const CronJob = require('cron').CronJob;
 const diaper = require('./diaper.js');
 const motorbike = require('./motorbike.js');
+const sendMail = require('./sendMail.js');
 
 require('dotenv').config();
 
