@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 
-docker build -t node:parsecr .
+docker build -t parsecr:carousel .
 
 sleep 5
 
-docker rm -f parsecr
+docker rm -f carousel_find
 
-docker run --name parsecr -d node:parsecr
+docker run --name carousel_find -d parsecr:carousel
