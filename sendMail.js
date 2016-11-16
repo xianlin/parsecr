@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 require('dotenv').config();
 
-var send = function(content, notFoundMsg) {
+var send = function(content) {
   // create reusable transporter object using the default SMTP transport
   // var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
   const transporter = nodemailer.createTransport(process.env.SMTP_GMAIL);
