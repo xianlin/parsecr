@@ -2,9 +2,6 @@ var cheerio = require('cheerio');
 var request = require('request');
 var nodemailer = require('nodemailer');
 
-require('dotenv').config();
-
-
 var checkStr = function(str, word) {
     var lowerCaseStr = str.toLowerCase();
     var lowerCaseWord = word.toLowerCase();
@@ -14,7 +11,6 @@ var checkStr = function(str, word) {
         return true;
     }
 };
-
 
 var blacklist = function(username) {
     blacklistArr = [""];
@@ -40,12 +36,12 @@ var inHistory = function(record) {
     }
 };
 
-var motorbike = function(cb){
+var find = function(webUrl, callback){
     request({
         method: 'GET',
-        url: 'https://carousell.com/search/products?query=honda%20750&collection_id=108&price_start=8000&price_end=30000&sort=recent'
+        url: webUrl
     }, function(err, response, body) {
-        if (err) return console.error(err);
+        if (err) return callback(err);
 
         // Tell Cherrio to load the HTML
         var $ = cheerio.load(body);
@@ -69,7 +65,7 @@ var motorbike = function(cb){
 
             // Add to array only if conditions are met
             if (checkStr(productTitle,"750") && checkStr(productTitle,"honda")
-                && checkStr(productTitle,"nc") && !checkStr(productTitle,"car") 
+                && checkStr(productTitle,"nc") && !checkStr(productTitle,"car")
                 &&  !blacklist(publisher) && !inHistory(productURL)) {
                 obj.title = productTitle;
                 obj.url = productURL;
@@ -88,40 +84,13 @@ var motorbike = function(cb){
 
         });
 
-        cb(result);
+        var data = {};
+        data.time = new Date();
+        data.result = result;
+
+        return callback(null, data);
     });
 };
 
-var sendEmail = function(content) {
-    if (content.length && process.env.NODE_ENV === 'production') {
-        // create reusable transporter object using the default SMTP transport
-        // var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
-        var transporter = nodemailer.createTransport(process.env.SMTP_GMAIL);
-
-        // setup e-mail data with unicode symbols
-        var mailOptions = {
-            to: process.env.EMAIL, // list of receivers
-            subject: 'Found Your Motorbike', // Subject line
-            text:  JSON.stringify(content)// html body
-        };
-
-        // send mail with defined transport object
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error){
-                return console.log(error);
-            }
-            var d = new Date();
-            console.log(d.toISOString() + ' Message sent: ' + info.response);
-        });
-    } else if (content.length === 0) {
-        console.log("No Motorbikes Found");
-    } else {
-        console.log(content);
-    }
-};
-
-
-exports.run = function() {
-  motorbike(sendEmail);
-};
+exports.find = find;
 

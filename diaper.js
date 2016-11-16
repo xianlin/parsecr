@@ -1,9 +1,6 @@
-var cheerio = require('cheerio');
-var request = require('request');
-var nodemailer = require('nodemailer');
-
-require('dotenv').config();
-
+const cheerio = require('cheerio');
+const request = require('request');
+const nodemailer = require('nodemailer');
 
 var checkStr = function(str, word) {
     var lowerCaseStr = str.toLowerCase();
@@ -14,7 +11,6 @@ var checkStr = function(str, word) {
         return true;
     }
 };
-
 
 var blacklist = function(username) {
     blacklistArr = ["radiant_city_services", "champ168", "miaomiao3", "sheryl83"];
@@ -40,12 +36,12 @@ var inHistory = function(record) {
     }
 };
 
-var diaper = function(cb){
+var find = function(webUrl, callback){
     request({
         method: 'GET',
-        url: 'https://carousell.com/search/products?query=huggies%20ultra%20diaper%20xl&price_start=5&price_end=60&condition=new&sort=recent'
+        url: webUrl
     }, function(err, response, body) {
-        if (err) return console.error(err);
+        if (err) return callback(err);
 
         // Tell Cherrio to load the HTML
         var $ = cheerio.load(body);
@@ -69,8 +65,8 @@ var diaper = function(cb){
 
             // Add to array only if conditions are met
             // Cannot be pants
-            if (!checkStr(productTitle,"pant") && !checkStr(productTitle,"pants") 
-                && !checkStr(productTitle,"Merries") && !checkStr(productTitle,"Drypers") 
+            if (!checkStr(productTitle,"pant") && !checkStr(productTitle,"pants")
+                && !checkStr(productTitle,"Merries") && !checkStr(productTitle,"Drypers")
                 &&  !blacklist(publisher) && !inHistory(productURL)) {
                 // if carton sale (3 pc), cannot over $50
                 if (checkStr(productTitle, "carton") && (productPrice <= 50)) {
@@ -101,41 +97,13 @@ var diaper = function(cb){
 
         });
 
-        cb(result);
+        var data = {};
+        data.time = new Date();
+        data.result = result;
+
+        return callback(null, data);
     });
 };
 
-var sendEmail = function(content) {
-    if (content.length && process.env.NODE_ENV === 'production') {
-        // create reusable transporter object using the default SMTP transport
-        // var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
-        var transporter = nodemailer.createTransport(process.env.SMTP_GMAIL);
-
-        // setup e-mail data with unicode symbols
-        var mailOptions = {
-            to: process.env.EMAIL, // list of receivers
-            subject: 'Found Your Diaper', // Subject line
-            text:  JSON.stringify(content)// html body
-        };
-
-        // send mail with defined transport object
-        transporter.sendMail(mailOptions, function(error, info){
-            if(error){
-                return console.log(error);
-            }
-            var d = new Date();
-            console.log(d.toISOString() + ' Message sent: ' + info.response);
-        });
-    } else if (content.length === 0) {
-        console.log("No Daipers Found");
-    } else {
-        console.log(content);
-    }
-};
-
-
-
-exports.run = function() {
-  diaper(sendEmail);
-};
+exports.find = find;
 
